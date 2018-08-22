@@ -16,6 +16,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
         <fileTypeFactory implementation="SimpleFileTypeFactory"/>
+        <fileTypeFactory implementation="MacroFileTypeFactory"/>
 
         <colorSettingsPage implementation="com.intellij.json.highlighting.JsonColorsPage"/>
         <lang.parserDefinition language="Simple" implementationClass="SimpleParserDefinition"/>
