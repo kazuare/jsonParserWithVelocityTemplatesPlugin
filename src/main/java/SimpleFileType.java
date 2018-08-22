@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.Icon;
 
 public class SimpleFileType extends LanguageFileType {
-    public static final Icon FILE = IconLoader.getIcon("/letter-e.png");
+    public static final Icon FILE = IconLoader.getIcon("/jsonWithTemplates.png");
     public static final SimpleFileType INSTANCE = new SimpleFileType();
 
     private SimpleFileType() {

@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 
 public class MacroFileType extends LanguageFileType {
-    public static final Icon FILE = IconLoader.getIcon("/letter-e.png");
+    public static final Icon FILE = IconLoader.getIcon("/template.png");
     public static final MacroFileType INSTANCE = new MacroFileType();
 
     private MacroFileType() {
