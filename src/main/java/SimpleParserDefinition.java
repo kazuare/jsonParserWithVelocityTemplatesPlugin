@@ -1,4 +1,3 @@
-import com.intellij.codeInsight.generation.VelocityIncludesClassLoader;
 import com.intellij.json.JsonParserDefinition;
 import com.intellij.json.psi.impl.JsonFileImpl;
 import com.intellij.lang.ASTNode;
@@ -28,7 +27,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collection;
 
 public class SimpleParserDefinition implements ParserDefinition {
@@ -72,28 +70,15 @@ public class SimpleParserDefinition implements ParserDefinition {
 
     @Override
     public PsiFile createFile(FileViewProvider viewProvider) {
-        logger.info("Starting json ---> " + viewProvider.getContents());
+        Path jsonFile = Paths.get(viewProvider.getVirtualFile().getPath()).getParent();
+        String jsonFileContent = viewProvider.getContents().toString();
 
-        ExtendedProperties prop = new ExtendedProperties();
-        prop.addProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, SimpleLog4JLogSystem.class.getName());
-        prop.addProperty("runtime.log.logsystem.log4j.category", "GenerateToString");
-        prop.addProperty(RuntimeConstants.RESOURCE_LOADER, "string");
-        prop.addProperty("string.resource.loader.description", "Velocity StringResource loader");
-        prop.addProperty("string.resource.loader.class", "org.apache.velocity.runtime.resource.loader.StringResourceLoader");
-        VelocityEngine velocity = new VelocityEngine();
-        velocity.setExtendedProperties(prop);
-        velocity.init();
+        logger.info("Starting json ---> " + jsonFileContent);
 
+        VelocityEngine velocity = getVelocity();
         StringResourceRepository repo = StringResourceLoader.getRepository();
 
-        Collection<VirtualFile> files = FileTypeIndex.getFiles(
-                MacroFileType.INSTANCE,
-                GlobalSearchScope.allScope(viewProvider.getManager().getProject()));
-
-        String fileContent = viewProvider.getContents().toString();
-
-        Path jsonFile = Paths.get(viewProvider.getVirtualFile().getPath()).getParent();
-        for (VirtualFile file : files) {
+        for (VirtualFile file : getAllMacroFiles(viewProvider.getManager().getProject())) {
             Path macrosFile = Paths.get(file.getPath());
 
             String templateName = jsonFile.relativize(macrosFile).toString();
@@ -107,9 +92,28 @@ public class SimpleParserDefinition implements ParserDefinition {
         }
 
         StringWriter stringWriter = new StringWriter();
-        velocity.evaluate(new VelocityContext(), stringWriter, "GenerateToString", fileContent);
+        velocity.evaluate(new VelocityContext(), stringWriter, "GenerateToString", jsonFileContent);
         logger.info("Resulting json:---> " + stringWriter.toString());
 
         return new JsonFileImpl(viewProvider, SimpleLanguage.INSTANCE);
+    }
+
+    private Collection<VirtualFile> getAllMacroFiles(Project project) {
+        return FileTypeIndex.getFiles(
+                MacroFileType.INSTANCE,
+                GlobalSearchScope.allScope(project));
+    }
+
+    private VelocityEngine getVelocity(){
+        ExtendedProperties prop = new ExtendedProperties();
+        prop.addProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, SimpleLog4JLogSystem.class.getName());
+        prop.addProperty("runtime.log.logsystem.log4j.category", "GenerateToString");
+        prop.addProperty(RuntimeConstants.RESOURCE_LOADER, "string");
+        prop.addProperty("string.resource.loader.description", "Velocity StringResource loader");
+        prop.addProperty("string.resource.loader.class", "org.apache.velocity.runtime.resource.loader.StringResourceLoader");
+        VelocityEngine velocity = new VelocityEngine();
+        velocity.setExtendedProperties(prop);
+        velocity.init();
+        return velocity;
     }
 }
