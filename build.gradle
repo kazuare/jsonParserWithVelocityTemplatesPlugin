@@ -13,8 +13,6 @@ repositories {
 }
 
 dependencies {
-// https://mvnrepository.com/artifact/org.apache.velocity/velocity
-    //compile group: 'org.apache.velocity', name: 'velocity', version: '1.6.2'
 }
 
 apply plugin: 'java'

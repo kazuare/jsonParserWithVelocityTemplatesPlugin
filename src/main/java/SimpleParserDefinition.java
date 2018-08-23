@@ -70,7 +70,7 @@ public class SimpleParserDefinition implements ParserDefinition {
 
     @Override
     public PsiFile createFile(FileViewProvider viewProvider) {
-        Path jsonFile = Paths.get(viewProvider.getVirtualFile().getPath()).getParent();
+        Path jsonFileFolder = Paths.get(viewProvider.getVirtualFile().getPath()).getParent();
         String jsonFileContent = viewProvider.getContents().toString();
 
         logger.info("Starting json ---> " + jsonFileContent);
@@ -81,7 +81,9 @@ public class SimpleParserDefinition implements ParserDefinition {
         for (VirtualFile file : getAllMacroFiles(viewProvider.getManager().getProject())) {
             Path macrosFile = Paths.get(file.getPath());
 
-            String templateName = jsonFile.relativize(macrosFile).toString();
+            logger.info("Trying to figure out relative path from paths: " + jsonFileFolder + " - " + macrosFile);
+
+            String templateName = jsonFileFolder.relativize(macrosFile).toString();
             try {
                 String template = new String(file.contentsToByteArray());
                 repo.putStringResource(templateName.replace("\\", "/"), template);
